@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -9,23 +9,40 @@ import { CheckCircle2, AlertCircle, ArrowRight, TrendingUp } from "lucide-react"
 
 export default function ResultsPage() {
   const router = useRouter()
-  const [matchScore] = useState(68)
+  const [matchScore, setMatchScore] = useState<number | null>(null)
+  const [analysis, setAnalysis] = useState<any>(null)
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const raw = window.localStorage.getItem("resumatch_analysis")
+    if (raw) {
+      try {
+        const data = JSON.parse(raw)
+        setAnalysis(data.analysis || {})
+        // try to surface a numeric score if provided
+        const maybeScore = data.analysis?.score || data.analysis?.match_score
+        if (typeof maybeScore === "number") setMatchScore(maybeScore)
+      } catch (e) {
+        console.error("Failed to parse analysis from localStorage", e)
+      }
+    }
+  }, [])
 
   const suggestions = [
     {
       type: "missing",
       title: "Missing Key Skills",
-      items: ["Python", "Machine Learning", "Data Visualization", "SQL"],
+      items: (analysis?.missing_keywords && analysis.missing_keywords.length > 0) ? analysis.missing_keywords : ["Python", "Machine Learning", "SQL"],
     },
     {
       type: "improve",
       title: "Areas to Strengthen",
-      items: ["Add quantifiable achievements", "Include project outcomes", "Highlight leadership experience"],
+      items: analysis?.suggestions || ["Add quantifiable achievements", "Include project outcomes"],
     },
     {
       type: "good",
       title: "Strong Points",
-      items: ["Relevant work experience", "Clear project descriptions", "Professional formatting"],
+      items: analysis?.highlights || ["Relevant work experience", "Clear project descriptions"],
     },
   ]
 
@@ -66,7 +83,7 @@ export default function ResultsPage() {
                 stroke="url(#gradient)"
                 strokeWidth="12"
                 fill="transparent"
-                strokeDasharray={`${matchScore * 5.53} 553`}
+                strokeDasharray={`${(matchScore || 0) * 5.53} 553`}
                 strokeLinecap="round"
                 className="transition-all duration-1000"
               />
@@ -78,14 +95,18 @@ export default function ResultsPage() {
               </defs>
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-5xl font-bold ai-gradient-text">{matchScore}%</span>
+              <span className="text-5xl font-bold ai-gradient-text">{matchScore ?? "--"}%</span>
               <span className="text-sm text-muted-foreground">Match Rate</span>
             </div>
           </div>
 
           <p className="text-muted-foreground max-w-xl mx-auto mb-6">
-            Your resume is a <strong className="text-foreground">good match</strong> for this position. With some
-            optimization, you could reach 85%+ and significantly increase your interview chances.
+            {analysis?.match_summary || (
+              <>
+                Your resume is a <strong className="text-foreground">good match</strong> for this position. With some
+                optimization, you could reach 85%+ and significantly increase your interview chances.
+              </>
+            )}
           </p>
 
           <Button
@@ -121,10 +142,10 @@ export default function ResultsPage() {
                 <h3 className="text-lg font-semibold">{section.title}</h3>
               </div>
               <ul className="space-y-2">
-                {section.items.map((item, i) => (
+                {section.items.map((item: any, i: number) => (
                   <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
                     <span className="text-foreground mt-0.5">•</span>
-                    <span>{item}</span>
+                    <span>{typeof item === "string" ? item : JSON.stringify(item)}</span>
                   </li>
                 ))}
               </ul>

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Navbar } from "@/components/navbar"
 import { Upload, FileText, Briefcase } from "lucide-react"
 import { Card } from "@/components/ui/card"
+import { postOptimizeWithFile } from "@/lib/api"
 
 export default function UploadPage() {
   const router = useRouter()
@@ -26,9 +27,19 @@ export default function UploadPage() {
     if (!resumeFile || !jobDescription) return
 
     setIsAnalyzing(true)
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-    router.push("/results")
+    try {
+      const data = await postOptimizeWithFile(resumeFile, jobDescription)
+      // store result for results page
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("resumatch_analysis", JSON.stringify(data))
+      }
+      router.push("/results")
+    } catch (err: any) {
+      console.error(err)
+      alert("Failed to analyze resume: " + (err?.message || err))
+    } finally {
+      setIsAnalyzing(false)
+    }
   }
 
   return (

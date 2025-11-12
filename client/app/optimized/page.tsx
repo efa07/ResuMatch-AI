@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Navbar } from "@/components/navbar"
@@ -8,8 +8,22 @@ import { Download, Copy, Check, Sparkles } from "lucide-react"
 
 export default function OptimizedPage() {
   const [copied, setCopied] = useState(false)
+  const [optimizedResume, setOptimizedResume] = useState<string | null>(null)
 
-  const optimizedResume = `JOHN DOE
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const raw = window.localStorage.getItem("resumatch_analysis")
+    if (raw) {
+      try {
+        const data = JSON.parse(raw)
+        setOptimizedResume(data.optimized_resume || null)
+      } catch (e) {
+        console.error("Failed to parse optimized resume from localStorage", e)
+      }
+    }
+  }, [])
+
+  const defaultResume = `JOHN DOE
 Software Engineer | Machine Learning Specialist
 john.doe@email.com | (555) 123-4567 | linkedin.com/in/johndoe
 
@@ -79,7 +93,7 @@ CERTIFICATIONS
         <Card className="p-8 mb-6">
           <div className="bg-background rounded-lg p-6 border border-border mb-6 max-h-[600px] overflow-y-auto">
             <pre className="font-mono text-sm whitespace-pre-wrap text-foreground leading-relaxed">
-              {optimizedResume}
+              {optimizedResume ?? defaultResume}
             </pre>
           </div>
 

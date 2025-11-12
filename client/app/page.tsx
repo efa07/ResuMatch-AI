@@ -42,7 +42,7 @@ export default function LandingPage() {
         </div>
 
         {/* Decorative geometric wave */}
-        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-border to-transparent" />
       </section>
 
       {/* Features Section */}
@@ -95,7 +95,7 @@ export default function LandingPage() {
       {/* CTA Section */}
       <section className="py-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="bg-gradient-to-br from-primary/10 to-accent/10 rounded-3xl p-12 border border-border">
+          <div className="bg-liner-to-br from-primary/10 to-accent/10 rounded-3xl p-12 border border-border">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">Ready to Stand Out?</h2>
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
               Join thousands of job seekers who've improved their resumes with AI
